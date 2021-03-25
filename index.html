@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marmicode Countdown</title>
+    <style>
+      body {
+        background-image: url(background.png);
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+        margin: 0;
+      }
+
+      .blur {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .container {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        height: 100%;
+        width: 100%;
+      }
+
+      .logo {
+        max-width: 400px;
+      }
+
+      .timer {
+        color: #380030;
+        text-shadow: white 0px 0px 6px;
+        font-size: 10em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blur"></div>
+    <div class="container">
+      <img class="logo" src="marmicode-io.png" alt="Marmicode" />
+      <div id="timer" class="timer" contenteditable>07:00</div>
+      <button id="start">START</button>
+    </div>
+    <audio loop>
+      <source src="music.mp3" type="audio/mpeg" />
+    </audio>
+    <script lang="javascript">
+      const audioEl = document.querySelector('audio');
+      const startEl = document.querySelector('#start');
+      const timerEl = document.querySelector('#timer');
+
+      const updateTimer = time => {
+        const minutes = Math.floor(time / 60);
+          const seconds = time % 60;
+          timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      const readTimer = () => {
+        const text = timerEl.textContent;
+        const [minutes, seconds] = text.split(':');
+        return parseInt(minutes) * 60 + parseInt(seconds);
+      }
+
+      const start = () => {
+        audioEl.play();
+        startEl.style.display = 'none';
+
+        let timeRemaining = readTimer();
+        updateTimer(timeRemaining);
+
+        setInterval(() => {
+          updateTimer(timeRemaining);
+          --timeRemaining;
+        }, 1000);
+      };
+
+      startEl.addEventListener('click', () => start());
+    </script>
+  </body>
+</html>
