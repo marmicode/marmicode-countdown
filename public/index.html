@@ -65,6 +65,8 @@
       const startEl = document.querySelector('#start');
       const timerEl = document.querySelector('#timer');
 
+      const hideElement = el => el.style.display = 'none';
+
       const isMusicEnabled = () => musicCheckboxEl.checked === true;
 
       const updateTimer = time => {
@@ -80,7 +82,7 @@
       }
 
       const start = () => {
-        controlPanelEl.style.display = 'none';
+        hideElement(controlPanelEl);
 
         if (isMusicEnabled()) {
           audioEl.play();
@@ -89,7 +91,13 @@
         let timeRemaining = readTimer();
         updateTimer(timeRemaining);
 
-        setInterval(() => {
+        const interval = setInterval(() => {
+          if (timeRemaining === 0) {
+            hideElement(timerEl);
+            clearInterval(interval);
+            return;
+          }
+
           updateTimer(timeRemaining);
           --timeRemaining;
         }, 1000);
