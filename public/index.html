@@ -50,15 +50,22 @@
     <div class="container">
       <img class="logo" src="marmicode-io.png" alt="Marmicode" />
       <div id="timer" class="timer" contenteditable>07:00</div>
-      <button id="start">START</button>
+      <div id="control-panel">
+        <input id="music-checkbox" type="checkbox" checked /><span>Music</span>
+        <button id="start" type="submit">START</button>
+      </div>
     </div>
     <audio loop>
       <source src="music.mp3" type="audio/mpeg" />
     </audio>
     <script lang="javascript">
       const audioEl = document.querySelector('audio');
+      const musicCheckboxEl = document.querySelector('#music-checkbox');
+      const controlPanelEl = document.querySelector('#control-panel');
       const startEl = document.querySelector('#start');
       const timerEl = document.querySelector('#timer');
+
+      const isMusicEnabled = () => musicCheckboxEl.checked === true;
 
       const updateTimer = time => {
         const minutes = Math.floor(time / 60);
@@ -73,8 +80,11 @@
       }
 
       const start = () => {
-        audioEl.play();
-        startEl.style.display = 'none';
+        controlPanelEl.style.display = 'none';
+
+        if (isMusicEnabled()) {
+          audioEl.play();
+        }
 
         let timeRemaining = readTimer();
         updateTimer(timeRemaining);
