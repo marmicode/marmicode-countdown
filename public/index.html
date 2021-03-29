@@ -55,27 +55,34 @@
         <button id="start" type="submit">START</button>
       </div>
     </div>
-    <audio loop>
-      <source src="music.mp3" type="audio/mpeg" />
+    <audio id="audio" loop>
+      <source id="audio-source" type="audio/mpeg" />
     </audio>
     <script lang="javascript">
-      const audioEl = document.querySelector('audio');
+      const audioEl = document.querySelector('#audio');
+      const audioSourceEl = document.querySelector('#audio-source');
       const musicCheckboxEl = document.querySelector('#music-checkbox');
       const controlPanelEl = document.querySelector('#control-panel');
       const startEl = document.querySelector('#start');
       const timerEl = document.querySelector('#timer');
 
-      const updateTimer = time => {
-        const minutes = Math.floor(time / 60);
-          const seconds = time % 60;
-          timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      const main = () => {
+        audioSourceEl.src = pickRandomMusic();
+        console.log(audioSourceEl.src);
+        startEl.addEventListener('click', () => start());
       }
 
-      const readTimer = () => {
-        const text = timerEl.textContent;
-        const [minutes, seconds] = text.split(':');
-        return parseInt(minutes) * 60 + parseInt(seconds);
-      }
+      const pickRandomMusic = () => {
+        /* More music here: https://www.unminus.com/ */
+        const musicList = [
+          'music.mp3',
+          'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio',
+          'https://feeds.soundcloud.com/stream/824693758-unminus-majesty.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio',
+          'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio'
+        ];
+
+        return musicList[Math.floor(Math.random() * musicList.length)];
+      };
 
       const start = () => {
         const startTime = now();
@@ -101,13 +108,25 @@
         }, 100);
       };
 
+      const updateTimer = time => {
+        const minutes = Math.floor(time / 60);
+          const seconds = time % 60;
+          timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      const readTimer = () => {
+        const text = timerEl.textContent;
+        const [minutes, seconds] = text.split(':');
+        return parseInt(minutes) * 60 + parseInt(seconds);
+      }
+
       const hideElement = el => el.style.display = 'none';
 
       const isMusicEnabled = () => musicCheckboxEl.checked === true;
 
       const now = () => Math.round(Date.now() / 1000);
 
-      startEl.addEventListener('click', () => start());
+      main();
     </script>
   </body>
 </html>
