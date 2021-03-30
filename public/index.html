@@ -68,7 +68,6 @@
 
       const main = () => {
         audioSourceEl.src = pickRandomMusic();
-        console.log(audioSourceEl.src);
         startEl.addEventListener('click', () => start());
       }
 
@@ -76,9 +75,8 @@
         /* More music here: https://www.unminus.com/ */
         const musicList = [
           'music.mp3',
-          'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio',
-          'https://feeds.soundcloud.com/stream/824693758-unminus-majesty.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio',
-          'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3?plead=please-dont-download-this-or-our-lawyers-wont-let-us-host-audio'
+          'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3',
+          'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3'
         ];
 
         return musicList[Math.floor(Math.random() * musicList.length)];
