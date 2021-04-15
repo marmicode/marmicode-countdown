@@ -4,7 +4,7 @@ import {
   ref,
   watchEffect,
 } from 'https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js';
-import { now } from './utils';
+import { now } from './utils.js';
 
 export function useDurationForm() {
   const rawDuration = ref('07:00');

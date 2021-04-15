@@ -1,12 +1,12 @@
 import {
   computed,
-  createApp,
+  defineComponent,
   ref,
 } from 'https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js';
-import { useDurationForm, useTimer } from './hooks';
-import { playRandomMusic } from './utils';
+import { useDurationForm, useTimer } from './hooks.js';
+import { playRandomMusic } from './utils.js';
 
-const app = createApp({
+export const Countdown = defineComponent({
   setup() {
     const isMusicEnabled = ref(true);
 
@@ -60,5 +60,3 @@ const app = createApp({
         <button @click="start()" type="submit">START</button>
       </div>`,
 });
-
-app.mount('mc-countdown');
