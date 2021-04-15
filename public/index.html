@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marmicode Countdown</title>
     <style>
+      html {
+        height: 100%;
+      }
+
       body {
         background-image: url(background.png);
         background-position: center;
@@ -13,121 +17,150 @@
         background-repeat: no-repeat;
         background-size: cover;
         margin: 0;
-      }
-
-      .blur {
-        position: absolute;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
-        height: 100vh;
-        width: 100vw;
+        min-height: 100%;
       }
 
       .container {
-        position: absolute;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: space-evenly;
         height: 100%;
         width: 100%;
-      }
 
-      .logo {
-        max-width: 400px;
-      }
-
-      .timer {
-        color: #380030;
-        text-shadow: white 0px 0px 6px;
-        font-size: 10em;
-        font-weight: bold;
+        /* Blur. */
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        min-height: 100vh;
+        width: 100%;
       }
     </style>
   </head>
   <body>
-    <div class="blur"></div>
     <div class="container">
-      <img class="logo" src="marmicode-io.png" alt="Marmicode" />
-      <div id="timer" class="timer" contenteditable>07:00</div>
-      <div id="control-panel">
-        <input id="music-checkbox" type="checkbox" checked /><span>Music</span>
-        <button id="start" type="submit">START</button>
-      </div>
+      <mc-countdown></mc-countdown>
     </div>
-    <audio id="audio" loop>
-      <source id="audio-source" type="audio/mpeg" />
-    </audio>
-    <script lang="javascript">
-      const audioEl = document.querySelector('#audio');
-      const audioSourceEl = document.querySelector('#audio-source');
-      const musicCheckboxEl = document.querySelector('#music-checkbox');
-      const controlPanelEl = document.querySelector('#control-panel');
-      const startEl = document.querySelector('#start');
-      const timerEl = document.querySelector('#timer');
+    <script type="module">
+      import {
+        createApp,
+        computed,
+        onUnmounted,
+        ref,
+        watchEffect,
+      } from 'https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js';
 
-      const main = () => {
-        audioSourceEl.src = pickRandomMusic();
-        startEl.addEventListener('click', () => start());
-      }
+      const app = createApp({
+        setup() {
+          let _interval = null;
+          const _now = ref(null);
+          const _startTime = ref(null);
+          const rawDuration = ref('07:00');
+          const isMusicEnabled = ref(true);
 
-      const pickRandomMusic = () => {
-        /* More music here: https://www.unminus.com/ */
-        const musicList = [
-          'music.mp3',
-          'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3',
-          'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3',
-          'https://feeds.soundcloud.com/stream/554065455-unminus-jazz-mezzo.mp3',
-          'https://feeds.soundcloud.com/stream/35354127-unminus-easy.mp3',
-          'https://feeds.soundcloud.com/stream/265746727-unminus-pipo-interludo.mp3'
-        ];
+          const duration = computed(() => {
+            const [minutes, seconds] = rawDuration.value.split(':');
+            return parseInt(minutes) * 60 + parseInt(seconds);
+          });
+          const remainingTime = computed(() => {
+            if (_startTime.value == null || _now.value == null) {
+              return null;
+            }
 
-        return musicList[Math.floor(Math.random() * musicList.length)];
-      };
+            return duration.value - (_now.value - _startTime.value);
+          });
+          const remainingMinutes = computed(() =>
+            Math.floor(remainingTime.value / 60)
+          );
+          const remainingSeconds = computed(() => remainingTime.value % 60);
+          const started = computed(() => _startTime.value != null);
 
-      const start = () => {
-        const startTime = now();
+          /* Stop timer. */
+          watchEffect(() => {
+            if (remainingTime.value != null && remainingTime.value <= 0) {
+              _stopTimeCounter();
+            }
+          });
 
-        hideElement(controlPanelEl);
+          onUnmounted(() => _stopTimeCounter());
 
-        if (isMusicEnabled()) {
-          audioEl.play();
-        }
+          const _stopTimeCounter = () => clearInterval(_interval);
 
-        const duration = readTimer();
+          return {
+            duration,
+            isMusicEnabled,
+            rawDuration,
+            started,
+            remainingTime,
+            remainingMinutes,
+            remainingSeconds,
+            start() {
+              _startTime.value = now();
 
-        const interval = setInterval(() => {
-          const timeRemaining = duration - (now() - startTime);
+              if (isMusicEnabled.value) {
+                playRandomMusic();
+              }
 
-          if (timeRemaining <= 0) {
-            hideElement(timerEl);
-            clearInterval(interval);
-            return;
-          }
+              _interval = setInterval(() => (_now.value = now()), 100);
+            },
+          };
+        },
+        data() {
+          return {
+            controlPanelStyle: {
+              textAlign: 'center',
+            },
+            logoStyle: {
+              maxWidth: '400px',
+            },
+            timerStyle: {
+              color: '#380030',
+              textShadow: 'white 0px 0px 6px',
+              fontSize: '10em',
+              fontWeight: 'bold',
+            },
+          };
+        },
+        template: `
+      <img :style="logoStyle" src="marmicode-io.png" alt="Marmicode" />
+      <div
+        v-if="remainingTime != null && remainingTime > 0"
+        :style="timerStyle">{{remainingMinutes.toString().padStart(2, '0')}}:{{remainingSeconds.toString().padStart(2, '0')}}</div>
+      <div v-if="!started" :style="controlPanelStyle">
+        <input v-model="rawDuration" type="time">
+        <input v-model="isMusicEnabled" type="checkbox" /><span>Music</span>
+        <button @click="start()" type="submit">START</button>
+      </div>`,
+      });
 
-          updateTimer(timeRemaining);
-        }, 100);
-      };
-
-      const updateTimer = time => {
-        const minutes = Math.floor(time / 60);
-          const seconds = time % 60;
-          timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      }
-
-      const readTimer = () => {
-        const text = timerEl.textContent;
-        const [minutes, seconds] = text.split(':');
-        return parseInt(minutes) * 60 + parseInt(seconds);
-      }
-
-      const hideElement = el => el.style.display = 'none';
-
-      const isMusicEnabled = () => musicCheckboxEl.checked === true;
+      app.mount('mc-countdown');
 
       const now = () => Math.round(Date.now() / 1000);
 
-      main();
+      const playRandomMusic = (musicList) => {
+        /* If no music list is given us default list. */
+        /* More music here: https://www.unminus.com/ */
+        musicList =
+          musicList?.length > 0
+            ? musicList
+            : [
+                'music.mp3',
+                'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3',
+                'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3',
+                'https://feeds.soundcloud.com/stream/554065455-unminus-jazz-mezzo.mp3',
+                'https://feeds.soundcloud.com/stream/35354127-unminus-easy.mp3',
+                'https://feeds.soundcloud.com/stream/265746727-unminus-pipo-interludo.mp3',
+              ];
+        const music = pickRandomItem(musicList);
+        const audio = new Audio(music);
+        audio.play();
+        /* Select a music that wasn't already played. */
+        audio.addEventListener('ended', () =>
+          playRandomMusic(musicList.filter((_music) => _music !== music))
+        );
+      };
+
+      const pickRandomItem = (items) =>
+        items[Math.floor(Math.random() * items.length)];
     </script>
   </body>
 </html>
