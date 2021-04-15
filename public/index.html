@@ -5,6 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marmicode Countdown</title>
+    <link
+      rel="preload"
+      href="https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js"
+      as="script"
+    />
+    <link rel="stylesheet" href="hooks.js" as="script" />
+    <link rel="stylesheet" href="utils.js" as="script" />
     <style>
       html {
         height: 100%;
@@ -40,128 +47,6 @@
     <div class="container">
       <mc-countdown></mc-countdown>
     </div>
-    <script type="module">
-      import {
-        createApp,
-        computed,
-        onUnmounted,
-        ref,
-        watchEffect,
-      } from 'https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js';
-
-      const app = createApp({
-        setup() {
-          let _interval = null;
-          const _now = ref(null);
-          const _startTime = ref(null);
-          const rawDuration = ref('07:00');
-          const isMusicEnabled = ref(true);
-
-          const duration = computed(() => {
-            const [minutes, seconds] = rawDuration.value.split(':');
-            return parseInt(minutes) * 60 + parseInt(seconds);
-          });
-          const remainingTime = computed(() => {
-            if (_startTime.value == null || _now.value == null) {
-              return null;
-            }
-
-            return duration.value - (_now.value - _startTime.value);
-          });
-          const remainingMinutes = computed(() =>
-            Math.floor(remainingTime.value / 60)
-          );
-          const remainingSeconds = computed(() => remainingTime.value % 60);
-          const started = computed(() => _startTime.value != null);
-
-          /* Stop timer. */
-          watchEffect(() => {
-            if (remainingTime.value != null && remainingTime.value <= 0) {
-              _stopTimeCounter();
-            }
-          });
-
-          onUnmounted(() => _stopTimeCounter());
-
-          const _stopTimeCounter = () => clearInterval(_interval);
-
-          return {
-            duration,
-            isMusicEnabled,
-            rawDuration,
-            started,
-            remainingTime,
-            remainingMinutes,
-            remainingSeconds,
-            start() {
-              _startTime.value = now();
-
-              if (isMusicEnabled.value) {
-                playRandomMusic();
-              }
-
-              _interval = setInterval(() => (_now.value = now()), 100);
-            },
-          };
-        },
-        data() {
-          return {
-            controlPanelStyle: {
-              textAlign: 'center',
-            },
-            logoStyle: {
-              maxWidth: '400px',
-            },
-            timerStyle: {
-              color: '#380030',
-              textShadow: 'white 0px 0px 6px',
-              fontSize: '10em',
-              fontWeight: 'bold',
-            },
-          };
-        },
-        template: `
-      <img :style="logoStyle" src="marmicode-io.png" alt="Marmicode" />
-      <div
-        v-if="remainingTime != null && remainingTime > 0"
-        :style="timerStyle">{{remainingMinutes.toString().padStart(2, '0')}}:{{remainingSeconds.toString().padStart(2, '0')}}</div>
-      <div v-if="!started" :style="controlPanelStyle">
-        <input v-model="rawDuration" type="time">
-        <input v-model="isMusicEnabled" type="checkbox" /><span>Music</span>
-        <button @click="start()" type="submit">START</button>
-      </div>`,
-      });
-
-      app.mount('mc-countdown');
-
-      const now = () => Math.round(Date.now() / 1000);
-
-      const playRandomMusic = (musicList) => {
-        /* If no music list is given us default list. */
-        /* More music here: https://www.unminus.com/ */
-        musicList =
-          musicList?.length > 0
-            ? musicList
-            : [
-                'lemasculin-bitchy-goose.mp3',
-                'music.mp3',
-                'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3',
-                'https://feeds.soundcloud.com/stream/827208181-unminus-autumn-allure.mp3',
-                'https://feeds.soundcloud.com/stream/554065455-unminus-jazz-mezzo.mp3',
-                'https://feeds.soundcloud.com/stream/35354127-unminus-easy.mp3',
-                'https://feeds.soundcloud.com/stream/265746727-unminus-pipo-interludo.mp3',
-              ];
-        const music = pickRandomItem(musicList);
-        const audio = new Audio(music);
-        audio.play();
-        /* Select a music that wasn't already played. */
-        audio.addEventListener('ended', () =>
-          playRandomMusic(musicList.filter((_music) => _music !== music))
-        );
-      };
-
-      const pickRandomItem = (items) =>
-        items[Math.floor(Math.random() * items.length)];
-    </script>
+    <script type="module" src="./index.js"></script>
   </body>
 </html>
