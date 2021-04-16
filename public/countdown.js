@@ -56,7 +56,13 @@ export const Countdown = defineComponent({
   data() {
     return {
       controlPanelStyle: {
+        display: 'flex',
+        flexDirection: 'column',
         textAlign: 'center',
+      },
+      inputStyle: {
+        textAlign: 'right',
+        width: '60px',
       },
       logoStyle: {
         maxWidth: '400px',
@@ -68,9 +74,12 @@ export const Countdown = defineComponent({
 
       <Timer v-if="remainingTime > 0" :remainingTime="remainingTime"></Timer>
 
-      <div v-if="!isStarted" :style="controlPanelStyle">
-        <input v-model="rawDuration" type="number">
-        <input v-model="isMusicEnabled" type="checkbox" /><span>Music</span>
-        <button @click="start()" type="submit">START</button>
-      </div>`,
+      <form v-if="!isStarted" :style="controlPanelStyle" @submit="start()">
+        <input v-model="rawDuration" :style="inputStyle" type="number">
+        <span>
+          <input v-model="isMusicEnabled" type="checkbox" />
+          <span @click="isMusicEnabled = !isMusicEnabled">Music</span>
+        </span>
+        <button type="submit">START</button>
+      </form>`,
 });
