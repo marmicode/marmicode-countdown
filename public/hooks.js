@@ -1,18 +1,17 @@
 import {
   computed,
   onUnmounted,
+  reactive,
   ref,
   watchEffect,
 } from 'https://unpkg.com/vue@3.0.11/dist/vue.esm-browser.prod.js';
 import { now } from './utils.js';
 
 export function useDurationForm() {
-  const rawDuration = ref('07:00');
+  /* Raw duration in minutes (can be a float).*/
+  const rawDuration = ref(7);
 
-  const duration = computed(() => {
-    const [minutes, seconds] = rawDuration.value.split(':');
-    return parseInt(minutes) * 60 + parseInt(seconds);
-  });
+  const duration = computed(() => parseInt(rawDuration.value * 60));
 
   return {
     duration,
@@ -32,6 +31,7 @@ export function useTimer() {
 
     return _duration.value - (_now.value - _startTime.value);
   });
+
   const isStarted = computed(() => _startTime.value != null);
 
   /* Stop timer. */
