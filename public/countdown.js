@@ -51,31 +51,29 @@ export const Countdown = defineComponent({
         }
         startTimer(duration.value);
       },
-    };
-  },
-  data() {
-    return {
-      controlPanelStyle: {
-        display: 'flex',
-        flexDirection: 'column',
-        textAlign: 'center',
-      },
-      inputStyle: {
-        textAlign: 'right',
-        width: '60px',
-      },
-      logoStyle: {
-        maxWidth: '400px',
+      styles: {
+        controlPanel: {
+          display: 'flex',
+          flexDirection: 'column',
+          textAlign: 'center',
+        },
+        input: {
+          textAlign: 'right',
+          width: '60px',
+        },
+        logo: {
+          maxWidth: '400px',
+        },
       },
     };
   },
   template: `
-      <img :style="logoStyle" src="marmicode-io.png" alt="Marmicode" />
+      <img :style="styles.logo" src="marmicode-io.png" alt="Marmicode" />
 
       <Timer v-if="remainingTime > 0" :remainingTime="remainingTime"></Timer>
 
-      <form v-if="!isStarted" :style="controlPanelStyle" @submit="start()">
-        <input v-model="rawDuration" :style="inputStyle" type="number">
+      <form v-if="!isStarted" :style="styles.controlPanel" @submit="start()">
+        <input v-model="rawDuration" :style="styles.input" type="number">
         <span>
           <input v-model="isMusicEnabled" type="checkbox" />
           <span @click="isMusicEnabled = !isMusicEnabled">Music</span>

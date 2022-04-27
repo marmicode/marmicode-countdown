@@ -7,6 +7,7 @@ export const playRandomMusic = (musicList) => {
     musicList?.length > 0
       ? musicList
       : [
+          '404.mp3',
           'lemasculin-bitchy-goose.mp3',
           'music.mp3',
           'https://feeds.soundcloud.com/stream/1000622302-unminus-moon-landing-countdown.mp3',
